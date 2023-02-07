@@ -1,3 +1,5 @@
+//SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.0;
 
 contract VaccineManagementSystem {
@@ -11,13 +13,13 @@ contract VaccineManagementSystem {
     }
 
     // Mapping to store user information
-    mapping(address => User) public users;
+    mapping(address => User) public Users;
 
-    // Address of the authority
-    address public authorityAddress;
+    // Address of the authority (enter address here)
+    address public authorityAddress = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
 
-    // Address of the healthcare center
-    address public healthcareCenterAddress;
+    // Address of the healthcare center(enter address here)
+    address public healthcareCenterAddress = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
 
     // Event to emit when a user is registered
     event UserRegistered(address indexed user, string name, uint age, string nid);
@@ -34,43 +36,46 @@ contract VaccineManagementSystem {
     // Function to register a user
     function registerUser(string memory name, uint age, string memory nid) public {
         // Check if the user's NID is already in the blockchain
-        if (users[msg.sender].nid == "") {
+       require (keccak256(abi.encodePacked(Users[msg.sender].nid)) == keccak256(abi.encodePacked("")), "User nid already in database"); 
             // Add the user to the mapping
-            users[msg.sender] = User(name, age, nid, 0, false);
+            Users[msg.sender] = User(name, age, nid, 0, false);
 
             // Emit the UserRegistered event
             emit UserRegistered(msg.sender, name, age, nid);
-        }
+        
+          
     }
 
     // Function for the authority to approve a user's registration
     function approveUser(address user) public {
         require(msg.sender == authorityAddress, "Only the authority can approve a user");
+        User storage userA = Users[user];
 
         // Update the user's isApproved status
-        users[user].isApproved = true;
+        Users[user].isApproved = true;
 
         // Emit the UserApproved event
-        emit UserApproved(user, users[user].name, users[user].age, users[user].nid);
+        emit UserApproved(user, userA.name, userA.age, userA.nid);
     }
 
     // Function for the healthcare center to record a vaccine dose
     function recordVaccineDose(address user) public {
         require(msg.sender == healthcareCenterAddress, "Only the healthcare center can record a vaccine dose");
-
+        User storage userA = Users[user];
         // Increment the user's vaccineDoses
-        users[user].vaccineDoses++;
+        userA.vaccineDoses++;
 
         // Emit the UserVaccinated event
-        emit UserVaccinated(user, users[user].vaccineDoses);
+        emit UserVaccinated(user, userA.vaccineDoses);
     }
 
     // Function for a user to request a certificate
     function requestCertificate(address user) public {
+        User storage userA = Users[user];
         // Check if the user's registration has been approved
-        require(users[user].isApproved, "The user's registration must be approved first");
+        require(userA.isApproved, "The user's registration must be approved first");
 
         // Emit the CertificateIssued event
-        emit CertificateIssued(user, users[user].name, users[user].age, users[user].vaccineDoses);
+        emit CertificateIssued(user, userA.name, userA.age, userA.vaccineDoses);
     }
 }
