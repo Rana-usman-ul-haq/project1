@@ -3,6 +3,8 @@
 pragma solidity ^0.8.0;
 
 contract VaccineManagementSystem {
+
+    
     // Struct to store user information
     struct User {
         string name;
@@ -12,8 +14,18 @@ contract VaccineManagementSystem {
         bool isApproved;
     }
 
+    struct certificateInformation{
+        string name;
+        uint age;
+        string nid;
+        uint vaccineDoses;
+    }
+
+    
+
     // Mapping to store user information
     mapping(address => User) public Users;
+    mapping(address => certificateInformation) public Certificates;
 
     // Address of the authority (enter address here)
     address public authorityAddress = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
@@ -74,8 +86,12 @@ contract VaccineManagementSystem {
         User storage userA = Users[user];
         // Check if the user's registration has been approved
         require(userA.isApproved, "The user's registration must be approved first");
+        Certificates[user] = certificateInformation(userA.name, userA.age, userA.nid, userA.vaccineDoses);
 
         // Emit the CertificateIssued event
         emit CertificateIssued(user, userA.name, userA.age, userA.vaccineDoses);
+        Certificates[user] = certificateInformation(userA.name, userA.age, userA.nid, userA.vaccineDoses);
     }
+
+
 }
